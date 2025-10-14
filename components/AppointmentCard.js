@@ -38,13 +38,17 @@ const formatAppointmentDateTime = (dateString) => {
 /**
  * AppointmentCard component to display appointment details.
  * @param {Object} appointment - The appointment object
+ * @param {Function} onClick - Optional click handler
  */
-const AppointmentCard = ({ appointment }) => {
+const AppointmentCard = ({ appointment, onClick }) => {
   const { tagClass, icon: StatusIcon, iconClass } = getStatusProps(appointment.status);
   const { date, time } = formatAppointmentDateTime(appointment.appointmentDate);
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+    <div 
+      onClick={() => onClick && onClick(appointment)}
+      className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:border-blue-300"
+    >
       
       {/* Header and Status */}
       <div className="flex justify-between items-start border-b pb-4 mb-4">

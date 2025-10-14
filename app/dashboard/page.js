@@ -1,12 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import DashboardLayout from '../../components/DashboardLayout';
 import AppointmentCard from '../../components/AppointmentCard';
+import AppointmentDetailModal from '../../components/AppointmentDetailModal';
 
 export default function Dashboard() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fetch appointments on component mount
   useEffect(() => {
@@ -48,39 +52,35 @@ export default function Dashboard() {
     }).sort((a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate));
   };
 
-  const handleLogout = async () => {
-    try {
-      // Call logout endpoint to clear the HttpOnly cookie
-      await fetch('http://localhost:8080/api/clinic/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
-    } catch (error) {
-      console.error('Logout failed:', error);
-    } finally {
-      // Redirect to login
-      window.location.href = '/auth/login';
-    }
+  const handleAppointmentClick = (appointment) => {
+    setSelectedAppointment(appointment);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedAppointment(null);
+  };
+
+  const handleAppointmentUpdate = (updatedAppointment) => {
+    // Update the appointment in the list
+    setAppointments(prevAppointments =>
+      prevAppointments.map(apt =>
+        apt.id === updatedAppointment.id ? updatedAppointment : apt
+      )
+    );
   };
 
   const upcomingAppointments = getUpcomingAppointments();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-6">
+    <DashboardLayout>
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Clinic Dashboard</h1>
-              <p className="text-gray-600 mt-1">Welcome to your clinic management system</p>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
-            >
-              Logout
-            </button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
+            <p className="text-gray-600 mt-1">Welcome to your clinic management system</p>
           </div>
         </div>
 
@@ -166,7 +166,11 @@ export default function Dashboard() {
               ) : (
                 <div className="space-y-4 max-h-96 overflow-y-auto">
                   {upcomingAppointments.map((appointment) => (
-                    <AppointmentCard key={appointment.id} appointment={appointment} />
+                    <AppointmentCard 
+                      key={appointment.id} 
+                      appointment={appointment}
+                      onClick={handleAppointmentClick}
+                    />
                   ))}
                 </div>
               )}
@@ -187,7 +191,11 @@ export default function Dashboard() {
               ) : (
                 <div className="space-y-4 max-h-96 overflow-y-auto">
                   {appointments.map((appointment) => (
-                    <AppointmentCard key={appointment.id} appointment={appointment} />
+                    <AppointmentCard 
+                      key={appointment.id} 
+                      appointment={appointment}
+                      onClick={handleAppointmentClick}
+                    />
                   ))}
                 </div>
               )}
@@ -195,6 +203,14 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Appointment Detail Modal */}
+      <AppointmentDetailModal
+        appointment={selectedAppointment}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onUpdate={handleAppointmentUpdate}
+      />
+    </DashboardLayout>
   );
 }
