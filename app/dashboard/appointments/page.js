@@ -8,9 +8,11 @@ import { Calendar, Clock, CheckCircle, XCircle, Hourglass, List } from 'lucide-r
 
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState([]);
+  const [allAppointments, setAllAppointments] = useState([]); // Store all appointments
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
+  const [viewByFilter, setViewByFilter] = useState('all'); // New view by filter
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -50,7 +52,8 @@ export default function AppointmentsPage() {
 
         if (response.ok) {
           const data = await response.json();
-          setAppointments(data);
+          setAllAppointments(data); // Store all appointments
+          setAppointments(data); // Initially show all
         } else {
           setError('Failed to fetch appointments');
         }
@@ -64,6 +67,53 @@ export default function AppointmentsPage() {
 
     fetchAppointments();
   }, [activeFilter]);
+
+  // Apply view by filter whenever allAppointments or viewByFilter changes
+  useEffect(() => {
+    if (allAppointments.length === 0) return;
+
+    const now = new Date();
+    let filtered = [...allAppointments];
+
+    switch (viewByFilter) {
+      case 'today':
+        filtered = allAppointments.filter(apt => {
+          const aptDate = new Date(apt.appointmentDate);
+          return aptDate.toDateString() === now.toDateString();
+        });
+        break;
+      
+      case 'week':
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - now.getDay()); // Start of week (Sunday)
+        weekStart.setHours(0, 0, 0, 0);
+        
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6); // End of week (Saturday)
+        weekEnd.setHours(23, 59, 59, 999);
+        
+        filtered = allAppointments.filter(apt => {
+          const aptDate = new Date(apt.appointmentDate);
+          return aptDate >= weekStart && aptDate <= weekEnd;
+        });
+        break;
+      
+      case 'month':
+        filtered = allAppointments.filter(apt => {
+          const aptDate = new Date(apt.appointmentDate);
+          return aptDate.getMonth() === now.getMonth() && 
+                 aptDate.getFullYear() === now.getFullYear();
+        });
+        break;
+      
+      case 'all':
+      default:
+        filtered = allAppointments;
+        break;
+    }
+
+    setAppointments(filtered);
+  }, [allAppointments, viewByFilter]);
 
   const handleAppointmentClick = (appointment) => {
     setSelectedAppointment(appointment);
@@ -125,24 +175,78 @@ export default function AppointmentsPage() {
 
         {/* Filter Buttons */}
         <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-          <div className="flex flex-wrap gap-3">
-            {filterButtons.map((button) => {
-              const Icon = button.icon;
-              const isActive = activeFilter === button.id;
-              return (
-                <button
-                  key={button.id}
-                  onClick={() => setActiveFilter(button.id)}
-                  className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${getColorClasses(
-                    button.color,
-                    isActive
-                  )} ${isActive ? 'shadow-lg scale-105' : 'shadow-sm'}`}
-                >
-                  <Icon className="h-5 w-5 mr-2" />
-                  {button.label}
-                </button>
-              );
-            })}
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Filter by Status</h3>
+            <div className="flex flex-wrap gap-3">
+              {filterButtons.map((button) => {
+                const Icon = button.icon;
+                const isActive = activeFilter === button.id;
+                return (
+                  <button
+                    key={button.id}
+                    onClick={() => setActiveFilter(button.id)}
+                    className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${getColorClasses(
+                      button.color,
+                      isActive
+                    )} ${isActive ? 'shadow-lg scale-105' : 'shadow-sm'}`}
+                  >
+                    <Icon className="h-5 w-5 mr-2" />
+                    {button.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* View By Time Filter */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">View By</h3>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => setViewByFilter('today')}
+                className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                  viewByFilter === 'today'
+                    ? 'bg-purple-600 text-white shadow-lg scale-105'
+                    : 'bg-purple-50 text-purple-700 hover:bg-purple-100 shadow-sm'
+                }`}
+              >
+                <Clock className="h-5 w-5 mr-2" />
+                Today
+              </button>
+              <button
+                onClick={() => setViewByFilter('week')}
+                className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                  viewByFilter === 'week'
+                    ? 'bg-purple-600 text-white shadow-lg scale-105'
+                    : 'bg-purple-50 text-purple-700 hover:bg-purple-100 shadow-sm'
+                }`}
+              >
+                <Calendar className="h-5 w-5 mr-2" />
+                This Week
+              </button>
+              <button
+                onClick={() => setViewByFilter('month')}
+                className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                  viewByFilter === 'month'
+                    ? 'bg-purple-600 text-white shadow-lg scale-105'
+                    : 'bg-purple-50 text-purple-700 hover:bg-purple-100 shadow-sm'
+                }`}
+              >
+                <Calendar className="h-5 w-5 mr-2" />
+                This Month
+              </button>
+              <button
+                onClick={() => setViewByFilter('all')}
+                className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                  viewByFilter === 'all'
+                    ? 'bg-purple-600 text-white shadow-lg scale-105'
+                    : 'bg-purple-50 text-purple-700 hover:bg-purple-100 shadow-sm'
+                }`}
+              >
+                <List className="h-5 w-5 mr-2" />
+                All Time
+              </button>
+            </div>
           </div>
         </div>
 
