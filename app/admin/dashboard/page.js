@@ -89,7 +89,12 @@ export default function AdminDashboard() {
     setActionLoading(clinicId);
 
     try {
-      const response = await fetch(`http://localhost:8084/api/admin/action/activate/${clinicId}`, {
+      // Use different endpoints based on current status
+      const endpoint = currentStatus 
+        ? `http://localhost:8084/api/admin/action/deactivate/${clinicId}`
+        : `http://localhost:8084/api/admin/action/activate/${clinicId}`;
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         credentials: 'include',
         headers: {

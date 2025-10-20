@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload, Calendar, FileText, Clock, CheckCircle, XCircle, Hourglass, Save } from 'lucide-react';
 
 export default function AppointmentDetailModal({ appointment, isOpen, onClose, onUpdate }) {
@@ -156,204 +157,306 @@ export default function AppointmentDetailModal({ appointment, isOpen, onClose, o
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-        onClick={onClose}
-      />
+    <AnimatePresence>
+      {isOpen && appointment && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          {/* Backdrop */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-gray-900 bg-opacity-40 backdrop-blur-sm transition-opacity"
+            onClick={onClose}
+          />
 
-      {/* Modal */}
-      <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          {/* Header */}
-          <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-cyan-600 text-white p-6 rounded-t-2xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Edit Appointment</h2>
-                <p className="text-blue-100 mt-1">ID: {appointment.id} • {appointment.patientName}</p>
-              </div>
-              <button
-                onClick={onClose}
-                className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="p-6 space-y-6">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                {error}
-              </div>
-            )}
-
-            {uploadSuccess && (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
-                {uploadSuccess}
-              </div>
-            )}
-
-            {/* Patient Info (Read-only) */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-gray-900 mb-2">Patient Information</h3>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-gray-600">Name</p>
-                  <p className="font-medium text-gray-900">{appointment.patientName}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600">Contact</p>
-                  <p className="font-medium text-gray-900">{appointment.patientContactNo}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Appointment Date */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Calendar className="inline h-4 w-4 mr-2" />
-                Appointment Date & Time
-              </label>
-              <input
-                type="datetime-local"
-                name="appointmentDate"
-                value={formData.appointmentDate}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-              />
-            </div>
-
-            {/* Status */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <CheckCircle className="inline h-4 w-4 mr-2" />
-                Status
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                {statusOptions.map((status) => (
-                  <button
-                    key={status}
-                    type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, status }))}
-                    className={`px-4 py-3 rounded-lg font-medium transition-all ${
-                      formData.status === status
-                        ? 'ring-2 ring-blue-600 ' + getStatusColor(status)
-                        : 'border border-gray-300 hover:border-gray-400 text-gray-700'
-                    }`}
+          {/* Modal */}
+          <div className="flex min-h-full items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ duration: 0.3, type: "spring" }}
+              className="relative bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-gray-100"
+            >
+              {/* Header */}
+              <div className="sticky top-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white p-6 rounded-t-3xl z-10 shadow-lg">
+                <div className="flex items-center justify-between">
+                  <motion.div
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
                   >
-                    {status}
-                  </button>
-                ))}
+                    <h2 className="text-3xl font-bold flex items-center">
+                      <Calendar className="mr-3 h-8 w-8" />
+                      Edit Appointment
+                    </h2>
+                    <p className="text-blue-100 mt-2 font-medium">ID: {appointment.id} • {appointment.patientName}</p>
+                  </motion.div>
+                  <motion.button
+                    onClick={onClose}
+                    whileHover={{ scale: 1.1, rotate: 90 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-3 transition-all"
+                  >
+                    <X className="h-6 w-6" />
+                  </motion.button>
+                </div>
               </div>
-            </div>
 
-            {/* Medical Requirement */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <FileText className="inline h-4 w-4 mr-2" />
-                Medical Requirement
-              </label>
-              <textarea
-                name="medicalRequirement"
-                value={formData.medicalRequirement}
-                onChange={handleInputChange}
-                rows="3"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-gray-900 placeholder-gray-400"
-                placeholder="Enter medical requirement details"
-              />
-            </div>
-
-            {/* Remarks */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <FileText className="inline h-4 w-4 mr-2" />
-                Remarks
-              </label>
-              <textarea
-                name="remarks"
-                value={formData.remarks}
-                onChange={handleInputChange}
-                rows="3"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-gray-900 placeholder-gray-400"
-                placeholder="Add any remarks or notes"
-              />
-            </div>
-
-            {/* Report Upload */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Upload className="inline h-4 w-4 mr-2" />
-                Upload Clinic Report
-              </label>
-              <div className="space-y-3">
-                <input
-                  type="file"
-                  accept="image/*,.pdf"
-                  onChange={handleFileSelect}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                />
-                {selectedFile && (
-                  <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg">
-                    <span className="text-sm text-blue-900">
-                      Selected: {selectedFile.name}
-                    </span>
-                    <button
-                      onClick={handleUploadReport}
-                      disabled={uploading}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
+              {/* Content */}
+              <div className="p-6 space-y-6">
+                <AnimatePresence mode="wait">
+                  {error && (
+                    <motion.div 
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center shadow-lg"
                     >
-                      {uploading ? 'Uploading...' : 'Upload'}
-                    </button>
-                  </div>
-                )}
-                {formData.clinicReportUrl && (
-                  <div className="bg-green-50 p-3 rounded-lg">
-                    <p className="text-sm text-green-900 font-medium mb-1">Current Report:</p>
-                    <a
-                      href={formData.clinicReportUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:underline break-all"
+                      <XCircle className="h-5 w-5 mr-2 flex-shrink-0" />
+                      <span className="font-medium">{error}</span>
+                    </motion.div>
+                  )}
+
+                  {uploadSuccess && (
+                    <motion.div 
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      className="bg-green-50 border-2 border-green-200 text-green-700 px-4 py-3 rounded-xl flex items-center shadow-lg"
                     >
-                      {formData.clinicReportUrl}
-                    </a>
+                      <CheckCircle className="h-5 w-5 mr-2 flex-shrink-0" />
+                      <span className="font-medium">{uploadSuccess}</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Patient Info (Read-only) */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="bg-gradient-to-r from-gray-50 to-blue-50 p-5 rounded-xl border-2 border-gray-200 shadow-inner"
+                >
+                  <h3 className="font-bold text-gray-900 mb-3 flex items-center text-lg">
+                    <svg className="h-6 w-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    Patient Information
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="bg-white p-3 rounded-lg shadow-sm">
+                      <p className="text-gray-600 font-medium mb-1">Name</p>
+                      <p className="font-bold text-gray-900">{appointment.patientName}</p>
+                    </div>
+                    <div className="bg-white p-3 rounded-lg shadow-sm">
+                      <p className="text-gray-600 font-medium mb-1">Contact</p>
+                      <p className="font-bold text-gray-900">{appointment.patientContactNo}</p>
+                    </div>
                   </div>
-                )}
+                </motion.div>
+
+                {/* Appointment Date */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <label className="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                    <Calendar className="h-5 w-5 mr-2 text-blue-600" />
+                    Appointment Date & Time
+                  </label>
+                  <input
+                    type="datetime-local"
+                    name="appointmentDate"
+                    value={formData.appointmentDate}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 font-medium shadow-sm hover:border-blue-400"
+                  />
+                </motion.div>
+
+                {/* Status */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <label className="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                    <CheckCircle className="h-5 w-5 mr-2 text-green-600" />
+                    Status
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {statusOptions.map((status, index) => (
+                      <motion.button
+                        key={status}
+                        type="button"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.35 + index * 0.05 }}
+                        onClick={() => setFormData(prev => ({ ...prev, status }))}
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`px-4 py-3 rounded-xl font-bold transition-all shadow-md ${
+                          formData.status === status
+                            ? 'ring-4 ring-blue-600 shadow-xl ' + getStatusColor(status)
+                            : 'border-2 border-gray-300 hover:border-gray-400 text-gray-700 hover:shadow-lg'
+                        }`}
+                      >
+                        {status}
+                      </motion.button>
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Medical Requirement */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <label className="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                    <FileText className="h-5 w-5 mr-2 text-red-600" />
+                    Medical Requirement
+                  </label>
+                  <textarea
+                    name="medicalRequirement"
+                    value={formData.medicalRequirement}
+                    onChange={handleInputChange}
+                    rows="3"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none text-gray-900 placeholder-gray-400 shadow-sm hover:border-blue-400"
+                    placeholder="Enter medical requirement details"
+                  />
+                </motion.div>
+
+                {/* Remarks */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <label className="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                    <FileText className="h-5 w-5 mr-2 text-blue-600" />
+                    Remarks
+                  </label>
+                  <textarea
+                    name="remarks"
+                    value={formData.remarks}
+                    onChange={handleInputChange}
+                    rows="3"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none text-gray-900 placeholder-gray-400 shadow-sm hover:border-blue-400"
+                    placeholder="Add any remarks or notes"
+                  />
+                </motion.div>
+
+                {/* Report Upload */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                >
+                  <label className="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                    <Upload className="h-5 w-5 mr-2 text-purple-600" />
+                    Upload Clinic Report
+                  </label>
+                  <div className="space-y-3">
+                    <input
+                      type="file"
+                      accept="image/*,.pdf"
+                      onChange={handleFileSelect}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 shadow-sm"
+                    />
+                    {selectedFile && (
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border-2 border-blue-200 shadow-lg"
+                      >
+                        <span className="text-sm text-blue-900 font-semibold flex items-center">
+                          <FileText className="h-4 w-4 mr-2" />
+                          {selectedFile.name}
+                        </span>
+                        <motion.button
+                          onClick={handleUploadReport}
+                          disabled={uploading}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:shadow-xl disabled:opacity-50 text-sm font-bold transition-all"
+                        >
+                          {uploading ? (
+                            <span className="flex items-center">
+                              <svg className="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Uploading...
+                            </span>
+                          ) : 'Upload'}
+                        </motion.button>
+                      </motion.div>
+                    )}
+                    {formData.clinicReportUrl && (
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-green-50 p-4 rounded-xl border-2 border-green-200 shadow-lg"
+                      >
+                        <p className="text-sm text-green-900 font-bold mb-2 flex items-center">
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Current Report:
+                        </p>
+                        <a
+                          href={formData.clinicReportUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:text-blue-700 hover:underline break-all font-medium"
+                        >
+                          {formData.clinicReportUrl}
+                        </a>
+                      </motion.div>
+                    )}
+                  </div>
+                </motion.div>
               </div>
-            </div>
-          </div>
 
-          {/* Footer */}
-          <div className="sticky bottom-0 bg-gray-50 px-6 py-4 rounded-b-2xl border-t border-gray-200 flex justify-end space-x-3">
-            <button
-              onClick={onClose}
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSaveChanges}
-              disabled={saving}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium transition-colors flex items-center"
-            >
-              {saving ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Changes
-                </>
-              )}
-            </button>
+              {/* Footer */}
+              <div className="sticky bottom-0 bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-5 rounded-b-3xl border-t-2 border-gray-200 flex justify-end space-x-4 shadow-lg">
+                <motion.button
+                  onClick={onClose}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 font-bold transition-all shadow-md hover:shadow-xl"
+                >
+                  Cancel
+                </motion.button>
+                <motion.button
+                  onClick={handleSaveChanges}
+                  disabled={saving}
+                  whileHover={{ scale: saving ? 1 : 1.05, y: saving ? 0 : -2 }}
+                  whileTap={{ scale: saving ? 1 : 0.95 }}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-xl hover:shadow-2xl disabled:opacity-50 font-bold transition-all flex items-center shadow-lg"
+                >
+                  {saving ? (
+                    <>
+                      <motion.div 
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="rounded-full h-5 w-5 border-b-2 border-white mr-2"
+                      ></motion.div>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-5 w-5 mr-2" />
+                      Save Changes
+                    </>
+                  )}
+                </motion.button>
+              </div>
+            </motion.div>
           </div>
         </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 }
