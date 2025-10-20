@@ -202,11 +202,11 @@ export default function AppointmentDetailModal({ appointment, isOpen, onClose, o
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-gray-600">Name</p>
-                  <p className="font-medium">{appointment.patientName}</p>
+                  <p className="font-medium text-gray-900">{appointment.patientName}</p>
                 </div>
                 <div>
                   <p className="text-gray-600">Contact</p>
-                  <p className="font-medium">{appointment.patientContactNo}</p>
+                  <p className="font-medium text-gray-900">{appointment.patientContactNo}</p>
                 </div>
               </div>
             </div>
@@ -222,7 +222,7 @@ export default function AppointmentDetailModal({ appointment, isOpen, onClose, o
                 name="appointmentDate"
                 value={formData.appointmentDate}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
               />
             </div>
 
@@ -241,7 +241,7 @@ export default function AppointmentDetailModal({ appointment, isOpen, onClose, o
                     className={`px-4 py-3 rounded-lg font-medium transition-all ${
                       formData.status === status
                         ? 'ring-2 ring-blue-600 ' + getStatusColor(status)
-                        : 'border border-gray-300 hover:border-gray-400'
+                        : 'border border-gray-300 hover:border-gray-400 text-gray-700'
                     }`}
                   >
                     {status}
@@ -261,7 +261,7 @@ export default function AppointmentDetailModal({ appointment, isOpen, onClose, o
                 value={formData.medicalRequirement}
                 onChange={handleInputChange}
                 rows="3"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-gray-900 placeholder-gray-400"
                 placeholder="Enter medical requirement details"
               />
             </div>
@@ -277,7 +277,7 @@ export default function AppointmentDetailModal({ appointment, isOpen, onClose, o
                 value={formData.remarks}
                 onChange={handleInputChange}
                 rows="3"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-gray-900 placeholder-gray-400"
                 placeholder="Add any remarks or notes"
               />
             </div>
@@ -293,7 +293,7 @@ export default function AppointmentDetailModal({ appointment, isOpen, onClose, o
                   type="file"
                   accept="image/*,.pdf"
                   onChange={handleFileSelect}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                 />
                 {selectedFile && (
                   <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg">

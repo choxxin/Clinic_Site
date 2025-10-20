@@ -289,7 +289,7 @@ export default function AdminDashboard() {
                         {clinic.email || 'N/A'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {clinic.phone || clinic.phoneNumber || 'N/A'}
+                        {clinic.phone || clinic.contactNo|| 'N/A'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
