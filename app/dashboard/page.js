@@ -12,6 +12,24 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+
+  // Patient Registration Form States
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [age, setAge] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [address, setAddress] = useState('');
+  const [medicalHistory, setMedicalHistory] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [selectedGender, setSelectedGender] = useState('');
+  const [allergies, setAllergies] = useState([]);
+  const [allergyInput, setAllergyInput] = useState('');
+  const [registerError, setRegisterError] = useState('');
+  const [registerSuccess, setRegisterSuccess] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
 
   // Fetch appointments on component mount
   useEffect(() => {
@@ -70,6 +88,97 @@ export default function Dashboard() {
         apt.id === updatedAppointment.id ? updatedAppointment : apt
       )
     );
+  };
+
+  // Patient Registration Functions
+  const handleAddAllergy = () => {
+    if (allergyInput.trim() !== '') {
+      setAllergies([...allergies, allergyInput.trim()]);
+      setAllergyInput('');
+    }
+  };
+
+  const handleRemoveAllergy = (index) => {
+    setAllergies(allergies.filter((_, i) => i !== index));
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    
+    // Validate required fields
+    if (!firstName || !lastName || !age || !phone || !email || !password) {
+      setRegisterError('Please fill in all required fields (marked with *).');
+      setRegisterSuccess('');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setRegisterError('Passwords do not match.');
+      setRegisterSuccess('');
+      return;
+    }
+
+    setIsRegistering(true);
+    setRegisterError('');
+    setRegisterSuccess('');
+
+    try {
+      const requestData = {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        age: parseInt(age),
+        phoneNumber: phone.trim(),
+        email: email.trim(),
+        password: password,
+      };
+
+      // Add optional fields only if they have values
+      if (selectedGender) requestData.gender = selectedGender;
+      if (address.trim()) requestData.address = address.trim();
+      if (medicalHistory.trim()) requestData.medicalHistory = medicalHistory.trim();
+      if (allergies.length > 0) {
+        requestData.allergies = allergies.map(allergy => ({ allergyName: allergy }));
+      }
+
+      const response = await fetch('http://localhost:8080/api/patient/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      if (response.ok || response.status === 201) {
+        setRegisterSuccess('Registration successful! Patient registered.');
+        setTimeout(() => {
+          setIsRegisterModalOpen(false);
+          resetRegisterForm();
+        }, 2000);
+      } else {
+        setRegisterError('Registration failed. Please try again.');
+      }
+    } catch (error) {
+      setRegisterError('Network error. Please check your connection.');
+    } finally {
+      setIsRegistering(false);
+    }
+  };
+
+  const resetRegisterForm = () => {
+    setFirstName('');
+    setLastName('');
+    setAge('');
+    setPhone('');
+    setEmail('');
+    setAddress('');
+    setMedicalHistory('');
+    setPassword('');
+    setConfirmPassword('');
+    setSelectedGender('');
+    setAllergies([]);
+    setAllergyInput('');
+    setRegisterError('');
+    setRegisterSuccess('');
   };
 
   const upcomingAppointments = getUpcomingAppointments();
@@ -186,6 +295,24 @@ export default function Dashboard() {
                     </motion.div>
                   ))}
                 </div>
+              </motion.div>
+
+              {/* Register Patient Button */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="mt-6"
+              >
+                <button
+                  onClick={() => setIsRegisterModalOpen(true)}
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 flex items-center justify-center gap-3 font-semibold text-lg hover:scale-105"
+                >
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                  </svg>
+                  Register Patient
+                </button>
               </motion.div>
             </motion.div>
           </div>
@@ -320,6 +447,274 @@ export default function Dashboard() {
         onClose={handleCloseModal}
         onUpdate={handleAppointmentUpdate}
       />
+
+      {/* Patient Registration Modal */}
+      {isRegisterModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+          >
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-t-2xl sticky top-0 z-10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-white/20 p-2 rounded-lg">
+                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Register Patient</h2>
+                    <p className="text-blue-100 text-sm">Create a new patient account</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setIsRegisterModalOpen(false);
+                    resetRegisterForm();
+                  }}
+                  className="text-white hover:bg-white/20 p-2 rounded-lg transition-all"
+                >
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleRegister} className="p-6 space-y-6">
+              {/* Required Information Section */}
+              <div>
+                <h3 className="text-xl font-bold text-blue-600 mb-4">Required Information</h3>
+                
+                {/* Name Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                    <input
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                    <input
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Age Field */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Age *</label>
+                  <input
+                    type="number"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                {/* Contact Fields */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                {/* Password Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Password *</label>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password *</label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Optional Information Section */}
+              <div className="border-t pt-6">
+                <h3 className="text-xl font-bold text-gray-600 mb-2">Optional Information</h3>
+                <p className="text-sm text-gray-500 mb-4">You can fill these later in the profile</p>
+
+                {/* Gender Selection */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                  <select
+                    value={selectedGender}
+                    onChange={(e) => setSelectedGender(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                {/* Address Field */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                  <textarea
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    rows={2}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Medical History Field */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Medical History</label>
+                  <textarea
+                    value={medicalHistory}
+                    onChange={(e) => setMedicalHistory(e.target.value)}
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Allergies Section */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Allergies</label>
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      type="text"
+                      value={allergyInput}
+                      onChange={(e) => setAllergyInput(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddAllergy())}
+                      placeholder="Enter allergy name (e.g., Penicillin, Dust)"
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddAllergy}
+                      className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-all"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  
+                  {/* Display Added Allergies */}
+                  {allergies.length === 0 ? (
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-500 flex items-center gap-2">
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      No allergies added yet
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {allergies.map((allergy, index) => (
+                        <div
+                          key={index}
+                          className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-2 rounded-full flex items-center gap-2"
+                        >
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                          <span className="font-medium">{allergy}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveAllergy(index)}
+                            className="text-red-500 hover:text-red-700 ml-1"
+                          >
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Error/Success Messages */}
+              {registerError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  {registerError}
+                </div>
+              )}
+
+              {registerSuccess && (
+                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {registerSuccess}
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isRegistering}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold text-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isRegistering ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    Registering...
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    </svg>
+                    Create Account
+                  </>
+                )}
+              </button>
+            </form>
+          </motion.div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }

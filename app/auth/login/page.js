@@ -1,11 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
-// We use standard browser functions (window.location.href and <a>) since 
-// Next.js specific imports like 'next/navigation' are not supported here.
+import emailjs from '@emailjs/browser';
 
 export default function LoginPage() {
+  const router = useRouter();
+  const form = useRef();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -26,8 +29,15 @@ export default function LoginPage() {
   };
 
   /**
-   * Submits the login form. If successful, it trusts the browser to automatically
-   * save the HttpOnly cookie and redirects the user.
+   * Generates a random 6-digit verification code.
+   * @returns {string} A 6-digit code.
+   */
+  const generateVerificationCode = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
+
+  /**
+   * Submits the login form, generates a verification code, and sends it via email.
    * @param {React.FormEvent} e - The form submission event.
    */
   const handleSubmit = async (e) => {
@@ -36,27 +46,55 @@ export default function LoginPage() {
     setError('');
 
     try {
-      // Send login request, including cookies. The browser will handle saving the HttpOnly token.
-      const response = await fetch('http://localhost:8080/api/clinic/auth/login', {
-        method: 'POST',
-        credentials: 'include', // Critical for sending/receiving cookies
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      // Generate 6-digit verification code
+      const verificationCode = generateVerificationCode();
+      
+      // Create hidden inputs for verification code
+      const codeInput = document.createElement('input');
+      codeInput.type = 'hidden';
+      codeInput.name = 'passcode';
+      codeInput.value = verificationCode;
+      form.current.appendChild(codeInput);
 
-      if (response.ok) {
-        // Login successful. The HttpOnly token is set automatically by the browser.
-        // We simply redirect to the dashboard.
-        window.location.href = '/dashboard'; 
+      // Log what we're sending
+      const formData = new FormData(form.current);
+      console.log('=== Sending Email ===');
+      console.log('OTP:', verificationCode);
+      console.log('Email:', formData.get('email'));
+      console.log('All form fields:');
+      for (let [key, value] of formData.entries()) {
+        console.log(`  ${key}: ${value}`);
+      }
+
+      // Send verification code via EmailJS using sendForm
+      const emailResponse = await emailjs.sendForm(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
+        form.current,
+        {
+          publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY,
+        }
+      );
+
+      // Remove the temporary input
+      form.current.removeChild(codeInput);
+
+      console.log('Email sent successfully!', emailResponse);
+
+      if (emailResponse.status === 200) {
+        // Email sent successfully, store credentials and code in sessionStorage
+        sessionStorage.setItem('loginEmail', formData.get('email'));
+        sessionStorage.setItem('loginPassword', formData.get('password'));
+        sessionStorage.setItem('verificationCode', verificationCode);
+        
+        // Redirect to verification page using Next.js router
+        router.push('/auth/login/verification');
       } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Login failed. Please check your credentials.');
+        setError('Failed to send verification code. Please try again.');
       }
     } catch (error) {
-      setError('Network error. Please try again.');
-      console.error('Login error:', error);
+      setError('Failed to send verification email. Please check your email address.');
+      console.error('Email sending error:', error);
     } finally {
       setLoading(false);
     }
@@ -106,7 +144,7 @@ export default function LoginPage() {
           transition={{ delay: 0.3, duration: 0.5 }}
           className="bg-white/80 backdrop-blur-xl py-10 px-8 shadow-2xl rounded-3xl border border-white/20 relative"
         >
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form ref={form} className="space-y-6" onSubmit={handleSubmit}>
             {error && (
               <motion.div 
                 initial={{ opacity: 0, x: -20 }}
@@ -234,9 +272,9 @@ export default function LoginPage() {
             >
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
-                <a href="/auth/register" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors hover:underline">
+                <Link href="/auth/register" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors hover:underline">
                   Sign up here
-                </a>
+                </Link>
               </p>
             </motion.div>
           </form>
