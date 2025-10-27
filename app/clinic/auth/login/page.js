@@ -88,7 +88,7 @@ export default function LoginPage() {
         sessionStorage.setItem('verificationCode', verificationCode);
         
         // Redirect to verification page using Next.js router
-        router.push('/auth/login/verification');
+        router.push('/clinic/auth/login/verification');
       } else {
         setError('Failed to send verification code. Please try again.');
       }
@@ -272,7 +272,7 @@ export default function LoginPage() {
             >
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
-                <Link href="/auth/register" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors hover:underline">
+                <Link href="/clinic/auth/register" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors hover:underline">
                   Sign up here
                 </Link>
               </p>

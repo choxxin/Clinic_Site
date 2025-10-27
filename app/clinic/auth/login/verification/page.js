@@ -23,7 +23,7 @@ export default function VerificationPage() {
 
     if (!loginEmail || !loginPassword || !storedVerificationCode) {
       // If no stored data, redirect back to login
-      router.push('/auth/login');
+      router.push('/clinic/auth/login');
       return;
     }
 
@@ -76,7 +76,7 @@ export default function VerificationPage() {
           sessionStorage.removeItem('verificationCode');
           
           // Login successful, redirect to dashboard using Next.js router
-          router.push('/dashboard');
+          router.push('/clinic/dashboard');
         } else {
           const errorData = await response.json();
           setError(errorData.message || 'Login failed. Please try again.');
@@ -290,7 +290,7 @@ export default function VerificationPage() {
                 </button>
               </p>
               <p className="text-sm text-gray-600">
-                <Link href="/auth/login" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors hover:underline">
+                <Link href="/clinic/auth/login" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors hover:underline">
                   Back to Login
                 </Link>
               </p>

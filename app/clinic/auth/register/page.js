@@ -67,7 +67,7 @@ export default function RegisterPage() {
         const data = await response.json();
         setSuccess('Registration successful! Redirecting to login...');
         setTimeout(() => {
-          router.push('/auth/login');
+          router.push('/clinic/auth/login');
         }, 2000);
       } else {
         const errorData = await response.json();
@@ -208,7 +208,7 @@ export default function RegisterPage() {
 
             <div className="text-center pt-2">
               <p className="text-sm text-gray-600">
-                Already have an account? <Link href="/auth/login" className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors hover:underline">Sign in here</Link>
+                Already have an account? <Link href="/clinic/auth/login" className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors hover:underline">Sign in here</Link>
               </p>
             </div>
           </form>

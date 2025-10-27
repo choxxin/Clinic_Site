@@ -16,16 +16,16 @@ export default function DashboardLayout({ children }) {
     } catch (error) {
       console.error('Logout failed:', error);
     } finally {
-      window.location.href = '/auth/login';
+      window.location.href = '/clinic/auth/login';
     }
   };
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: Home },
-    { name: 'Appointments', href: '/dashboard/appointments', icon: Calendar },
-    { name: 'Patients', href: '/dashboard/patients', icon: Users },
-    { name: 'Reports', href: '/dashboard/reports', icon: FileText },
-    { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+    { name: 'Dashboard', href: '/clinic/dashboard', icon: Home },
+    { name: 'Appointments', href: '/clinic/dashboard/appointments', icon: Calendar },
+    { name: 'Patients', href: '/clinic/dashboard/patients', icon: Users },
+    { name: 'Reports', href: '/clinic/dashboard/reports', icon: FileText },
+    { name: 'Settings', href: '/clinic/dashboard/settings', icon: Settings },
   ];
 
   return (
